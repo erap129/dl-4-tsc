@@ -1,4 +1,6 @@
 import os
+import traceback
+
 from utils.utils import generate_results_csv
 from utils.utils import transform_labels
 from utils.utils import create_directory
@@ -11,7 +13,7 @@ from utils.utils import viz_cam
 import numpy as np
 import sys
 import sklearn 
-
+os.environ["CUDA_VISIBLE_DEVICES"] = ''
 def fit_classifier(): 
     x_train = datasets_dict[dataset_name][0]
     y_train = datasets_dict[dataset_name][1]
@@ -37,7 +39,7 @@ def fit_classifier():
         x_test = x_test.reshape((x_test.shape[0],x_test.shape[1],1))
 
     input_shape = x_train.shape[1:]
-    classifier = create_classifier(classifier_name,input_shape, nb_classes, output_directory)
+    classifier = create_classifier(classifier_name,input_shape, nb_classes, output_directory_name)
 
     classifier.fit(x_train,y_train,x_test,y_test, y_true)
 
@@ -99,21 +101,17 @@ else:
 
                         output_directory_name = root_dir + '/results/' + classifier_name + '/' + archive_name + itr + '/' + \
                                                 dataset_name + '/'
-
-                        output_directory = create_directory(output_directory_name)
-
+                        create_directory(output_directory_name)
                         print('Method: ', archive_name, dataset_name, classifier_name, itr)
-
                         if os.path.exists(f'{output_directory_name}/DONE'):
                             print('Already done')
 
                         else:
-                            output_directory = output_directory_name
                             datasets_dict = read_dataset(root_dir, archive_name, dataset_name)
                             fit_classifier()
                             print('DONE')
                             # the creation of this directory means
-                            create_directory(output_directory + '/DONE')
+                            create_directory(output_directory_name + '/DONE')
                     except Exception as e:
                         from datetime import datetime
 
