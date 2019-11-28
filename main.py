@@ -1,3 +1,4 @@
+import os
 from utils.utils import generate_results_csv
 from utils.utils import transform_labels
 from utils.utils import create_directory
@@ -73,7 +74,7 @@ def create_classifier(classifier_name, input_shape, nb_classes, output_directory
 
 # change this directory for your machine
 # it should contain the archive folder containing both univariate and multivariate archives
-root_dir = '/mnt/nfs/casimir/'
+root_dir = os.path.dirname(os.path.abspath(__file__))
 
 if sys.argv[1]=='transform_mts_to_ucr_format':
     transform_mts_to_ucr_format()
@@ -88,30 +89,37 @@ elif sys.argv[1]=='generate_results_csv':
     print(res)
 else:
     # this is the code used to launch an experiment on a dataset
-    archive_name = sys.argv[1]
-    dataset_name = sys.argv[2]
-    classifier_name=sys.argv[3]
-    itr = sys.argv[4]
+    for archive_name in sys.argv[1].split(','):
+        for dataset_name in sys.argv[2].split(','):
+            for classifier_name in sys.argv[3].split(','):
+                for itr in sys.argv[4].split(','):
+                    try:
+                        if itr == '_itr_0':
+                            itr = ''
 
-    if itr == '_itr_0': 
-        itr = ''
+                        output_directory_name = root_dir + '/results/' + classifier_name + '/' + archive_name + itr + '/' + \
+                                                dataset_name + '/'
 
-    output_directory = root_dir+'/results/'+classifier_name+'/'+archive_name+itr+'/'+\
-        dataset_name+'/'
+                        output_directory = create_directory(output_directory_name)
 
-    output_directory = create_directory(output_directory)
+                        print('Method: ', archive_name, dataset_name, classifier_name, itr)
 
-    print('Method: ',archive_name, dataset_name, classifier_name, itr)
+                        if os.path.exists(f'{output_directory_name}/DONE'):
+                            print('Already done')
 
-    if output_directory is None: 
-        print('Already done')
-    else: 
+                        else:
+                            output_directory = output_directory_name
+                            datasets_dict = read_dataset(root_dir, archive_name, dataset_name)
+                            fit_classifier()
+                            print('DONE')
+                            # the creation of this directory means
+                            create_directory(output_directory + '/DONE')
+                    except Exception as e:
+                        from datetime import datetime
 
-        datasets_dict = read_dataset(root_dir,archive_name,dataset_name)
-
-        fit_classifier()
-
-        print('DONE')
-
-        # the creation of this directory means
-        create_directory(output_directory+'/DONE')
+                        now = datetime.now()
+                        with open(
+                                f"{root_dir}/error_logs/{now.strftime('%m.%d.%Y_%H:%M:%S')}_{archive_name}_{classifier_name}_{itr}.txt",
+                                "w") as err_file:
+                            print('experiment failed. Exception message: %s' % (str(e)), file=err_file)
+                            print(traceback.format_exc(), file=err_file)

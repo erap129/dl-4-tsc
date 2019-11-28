@@ -2,6 +2,9 @@ from builtins import print
 import numpy as np
 import pandas as pd
 import matplotlib
+
+from elad_utils import sktime_to_numpy
+
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 matplotlib.rcParams['font.family'] = 'sans-serif'
@@ -53,15 +56,24 @@ def create_path(root_dir,classifier_name, archive_name):
 def read_dataset(root_dir,archive_name,dataset_name):
     datasets_dict = {}
 
-    if archive_name == 'mts_archive':
+    if archive_name == 'mts_archive' or archive_name == 'EEG':
         file_name = root_dir+'/archives/'+archive_name+'/'+dataset_name+'/'
         x_train = np.load(file_name + 'x_train.npy')
         y_train = np.load(file_name + 'y_train.npy')
         x_test = np.load(file_name + 'x_test.npy')
         y_test = np.load(file_name + 'y_test.npy')
 
+        if archive_name == 'EEG':
+            x_train = np.transpose(x_train, (0, 2, 1))
+            x_test = np.transpose(x_test, (0, 2, 1))
+
         datasets_dict[dataset_name] = (x_train.copy(), y_train.copy(), x_test.copy(),
                                        y_test.copy())
+
+    elif archive_name == 'Multivariate_ts':
+        datasets_dict[dataset_name] = sktime_to_numpy(
+            root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TRAIN.ts',
+            root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TEST.ts')
 
     else:
         file_name = root_dir+'/archives/'+archive_name+'/'+dataset_name+'/'+dataset_name
@@ -77,10 +89,10 @@ def read_all_datasets(root_dir,archive_name, split_val = False):
 
     dataset_names_to_sort = []
 
-    if archive_name == 'mts_archive':
+    if archive_name == 'mts_archive' or archive_name == 'EEG':
 
-        for dataset_name in MTS_DATASET_NAMES:
-            root_dir_dataset = root_dir + '/archives/' + archive_name + '/' + dataset_name + '/'
+        for dataset_name in os.listdir(root_dir + 'archives/' + archive_name):
+            root_dir_dataset = root_dir + 'archives/' + archive_name + '/' + dataset_name + '/'
 
             x_train = np.load(root_dir_dataset+'x_train.npy')
             y_train = np.load(root_dir_dataset+'y_train.npy')
@@ -89,6 +101,13 @@ def read_all_datasets(root_dir,archive_name, split_val = False):
 
             datasets_dict[dataset_name] = (x_train.copy(), y_train.copy(), x_test.copy(),
                                            y_test.copy())
+
+    elif archive_name == 'Multivariate_ts':
+        for dataset_name in os.listdir(root_dir + '/archives/' + archive_name):
+            print(f'reading {dataset_name}...')
+            datasets_dict[dataset_name] = sktime_to_numpy(
+                root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TRAIN.ts',
+                root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TEST.ts')
 
     else:
         for dataset_name in DATASET_NAMES:
@@ -148,16 +167,16 @@ def transform_to_same_length(x,n_var,max_length):
     return ucr_x
 
 def transform_mts_to_ucr_format():
-    mts_root_dir = '/mnt/Other/mtsdata/'
-    mts_out_dir = '/mnt/nfs/casimir/archives/mts_archive/'
+    mts_root_dir = '/home/user/Documents/eladr/dl-4-tsc/mtsdata/'
+    mts_out_dir = '/home/user/Documents/eladr/dl-4-tsc/archives/mts_archive/'
     for dataset_name in MTS_DATASET_NAMES:
         # print('dataset_name',dataset_name)
 
         out_dir = mts_out_dir+dataset_name+'/'
 
-        # if create_directory(out_dir) is None:
-        #     print('Already_done')
-        #     continue
+        if create_directory(out_dir) is None:
+            print('Already_done')
+            continue
 
         a = loadmat(mts_root_dir+dataset_name+'/'+dataset_name+'.mat')
         a = a['mts']
@@ -258,12 +277,12 @@ def generate_results_csv(output_file_name, root_dir):
         'precision','accuracy','recall','duration'])
     for classifier_name in CLASSIFIERS:
         for archive_name in ARCHIVE_NAMES:
-            datasets_dict = read_all_datasets(root_dir,archive_name)
+            # datasets_dict = read_all_datasets(root_dir,archive_name)
             for it in range(ITERATIONS):
                 curr_archive_name = archive_name
                 if it != 0 :
                     curr_archive_name = curr_archive_name +'_itr_'+str(it)
-                for dataset_name in datasets_dict.keys():
+                for dataset_name in sorted(os.listdir(root_dir + '/archives/' + archive_name)):
                     output_dir = root_dir+'/results/'+classifier_name+'/'\
                     +curr_archive_name+'/'+dataset_name+'/'+'df_metrics.csv'
                     if not os.path.exists(output_dir):
@@ -274,7 +293,7 @@ def generate_results_csv(output_file_name, root_dir):
                     df_metrics['dataset_name'] = dataset_name
                     res = pd.concat( (res,df_metrics) ,axis=0,sort=False)
 
-    res.to_csv(root_dir+output_file_name, index = False)
+    res.to_csv(f'{root_dir}/results/{output_file_name}', index = False)
     # aggreagte the accuracy for iterations on same dataset
     res = pd.DataFrame({
         'accuracy' : res.groupby(

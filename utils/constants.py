@@ -11,9 +11,10 @@ UNIVARIATE_DATASET_NAMES = ['50words','Adiac','ArrowHead','Beef','BeetleFly','Bi
 MTS_DATASET_NAMES = ['ArabicDigits', 'AUSLAN', 'CharacterTrajectories', 'CMUsubject16', 'ECG',
 				'JapaneseVowels', 'KickvsPunch', 'Libras', 'NetFlow', 'UWave', 'Wafer', 'WalkvsRun']
 
-ITERATIONS = 1 # nb of random runs for random initializations
+ITERATIONS = 10 # nb of random runs for random initializations
 
-ARCHIVE_NAMES = ['UCR_TS_Archive_2015','mts_archive']
+# ARCHIVE_NAMES = ['UCR_TS_Archive_2015','mts_archive']
+ARCHIVE_NAMES = ['Multivariate_ts', 'EEG']
 
 CLASSIFIERS = ['fcn','mlp','resnet','tlenet','mcnn','twiesn','encoder','mcdcnn','cnn']
 
