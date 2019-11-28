@@ -43,7 +43,7 @@ def fit_classifier():
 
     classifier.fit(x_train,y_train,x_test,y_test, y_true)
 
-def create_classifier(classifier_name, input_shape, nb_classes, output_directory, verbose = False):
+def create_classifier(classifier_name, input_shape, nb_classes, output_directory, verbose = True):
     if classifier_name=='fcn': 
         from classifiers import fcn        
         return fcn.Classifier_FCN(output_directory,input_shape, nb_classes, verbose)
