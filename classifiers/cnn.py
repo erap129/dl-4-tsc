@@ -27,7 +27,11 @@ class Classifier_CNN:
         conv1 = keras.layers.AveragePooling1D(pool_size=3)(conv1)
 
         conv2 = keras.layers.Conv1D(filters=12,kernel_size=7,padding=padding,activation='sigmoid')(conv1)
-        conv2 = keras.layers.AveragePooling1D(pool_size=3)(conv2)
+
+        if conv2.shape[1] < 3:
+            conv2 = keras.layers.AveragePooling1D(pool_size=2)(conv2)
+        else:
+            conv2 = keras.layers.AveragePooling1D(pool_size=3)(conv2)
 
         flatten_layer = keras.layers.Flatten()(conv2)
 
