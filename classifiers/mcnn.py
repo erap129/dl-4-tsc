@@ -400,6 +400,10 @@ class Classifier_MCNN:
             pool_size = int(int(conv_layer.shape[1])/pool_factor)
 
             max_layer = keras.layers.MaxPooling1D(pool_size=pool_size)(conv_layer)
+            for st_1_layer in stage_1_layers:
+                if max_layer.shape[1] > st_1_layer.shape[1]:
+                    max_layer = keras.layers.MaxPooling1D(pool_size=pool_size+1, padding='same')(conv_layer)
+                    break
 
             # max_layer = keras.layers.GlobalMaxPooling1D()(conv_layer)
 
