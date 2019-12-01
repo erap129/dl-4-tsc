@@ -141,7 +141,7 @@ class Classifier_TLENET:
     
     def fit(self, x_train, y_train, x_test, y_test,y_true): 
         nb_epochs = 1000
-        batch_size= 64
+        batch_size= 32
         nb_classes = y_train.shape[1]
 
         # limit the number of augmented time series if series too long or too many 
