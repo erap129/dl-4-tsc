@@ -53,7 +53,7 @@ class Classifier_CNN:
 
     def fit(self, x_train, y_train, x_val, y_val, y_true):
         # x_val and y_val are only used to monitor the test loss and NOT for training
-        mini_batch_size = 16
+        mini_batch_size = 8
         nb_epochs = 2000
 
         start_time = time.time()
