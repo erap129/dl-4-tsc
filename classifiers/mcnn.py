@@ -127,7 +127,7 @@ class Classifier_MCNN:
         window_size = 0.2
         n_train_batch = 10
         n_epochs = 200
-        max_train_batch_size = 256
+        max_train_batch_size = 64
 
         # print('Original train shape: ', x_train.shape)
         # print('Original test shape: ', x_test.shape)
