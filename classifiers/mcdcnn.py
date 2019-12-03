@@ -101,8 +101,10 @@ class Classifier_MCDCNN:
         # convert the predicted from binary to integer
         y_pred = np.argmax(y_pred, axis=1)
 
-        save_logs(self.output_directory, hist, y_pred, y_true, duration,lr=False)
+        res = save_logs(self.output_directory, hist, y_pred, y_true, duration,lr=False)
 
         keras.backend.clear_session()
+
+        return res
 
 

@@ -209,3 +209,4 @@ class Classifier_TWIESN:
 					np.savetxt(output_directory_root+'W_out.txt', self.W_out)
 
 				gc.collect()
+		return df_metrics['accuracy']

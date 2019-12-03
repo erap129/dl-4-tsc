@@ -367,7 +367,7 @@ def save_logs(output_directory, hist, y_pred, y_true,duration,lr=True,y_true_val
     # plot losses
     plot_epochs_metric(hist, output_directory+'epochs_loss.png')
 
-    return df_metrics
+    return df_best_model['best_model_val_acc']
 
 def visualize_filter(root_dir):
 

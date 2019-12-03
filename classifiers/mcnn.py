@@ -124,10 +124,10 @@ class Classifier_MCNN:
         return (new_train, new_valid, new_test, lengths)
 
     def train(self, x_train, y_train, x_test, y_test,y_true, pool_factor, filter_size):
-        window_size = 0.2
-        n_train_batch = 5
+        window_size = 0.1
+        n_train_batch = 10
         n_epochs = 200
-        max_train_batch_size = 32
+        max_train_batch_size = 256
 
         # print('Original train shape: ', x_train.shape)
         # print('Original test shape: ', x_test.shape)
@@ -466,6 +466,7 @@ class Classifier_MCNN:
                 model = None
                 # clear memeory 
                 keras.backend.clear_session()
+        return best_df_metrics['accuracy']
 
 
 

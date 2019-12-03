@@ -1,6 +1,10 @@
 import os
+import platform
+import time
 import traceback
+from collections import OrderedDict
 
+from gdrive import upload_exp_results_to_gdrive
 from utils.utils import generate_results_csv
 from utils.utils import transform_labels
 from utils.utils import create_directory
@@ -14,6 +18,22 @@ import numpy as np
 import sys
 import sklearn 
 os.environ["CUDA_VISIBLE_DEVICES"] = ''
+
+def add_exp(architecture, dataset, iteration, total_time, result):
+    res_dict = OrderedDict()
+    res_dict['algorithm'] = architecture
+    res_dict['architecture'] = 'best'
+    res_dict['measure'] = 'accuracy'
+    res_dict['dataset'] = dataset
+    res_dict['iteration'] = iteration
+    res_dict['result'] = result
+    res_dict['runtime'] = total_time
+    res_dict['omniboard_id'] = ''
+    res_dict['machine'] = platform.node()
+    res_dict['local_exp_name'] = ''
+    return list(res_dict.values())
+
+
 def fit_classifier(): 
     x_train = datasets_dict[dataset_name][0]
     y_train = datasets_dict[dataset_name][1]
@@ -41,7 +61,10 @@ def fit_classifier():
     input_shape = x_train.shape[1:]
     classifier = create_classifier(classifier_name,input_shape, nb_classes, output_directory_name)
 
-    classifier.fit(x_train,y_train,x_test,y_test, y_true)
+    start_time = time.time()
+    res = classifier.fit(x_train,y_train,x_test,y_test, y_true)
+    total_time = time.time() - start_time
+    return res, total_time
 
 def create_classifier(classifier_name, input_shape, nb_classes, output_directory, verbose = True):
     if classifier_name=='fcn': 
@@ -108,10 +131,12 @@ else:
 
                         else:
                             datasets_dict = read_dataset(root_dir, archive_name, dataset_name)
-                            fit_classifier()
+                            res, total_time = fit_classifier()
                             print('DONE')
                             # the creation of this directory means
                             create_directory(output_directory_name + '/DONE')
+                            exp_line = add_exp(classifier_name, dataset_name, itr, total_time, res)
+                            upload_exp_results_to_gdrive(exp_line, 'University/Masters/Experiment Results/EEGNAS_results.xlsx')
                     except Exception as e:
                         from datetime import datetime
 

@@ -197,9 +197,11 @@ class Classifier_TLENET:
         
         duration = time.time() - start_time
         
-        save_logs(self.output_directory, hist, y_pred, y_true, duration )
+        res = save_logs(self.output_directory, hist, y_pred, y_true, duration )
 
         keras.backend.clear_session()
+
+        return res
         
                 
         
