@@ -19,7 +19,7 @@ class Classifier_MCDCNN:
 
     def build_model(self, input_shape, nb_classes):
         n_t = input_shape[0]
-        n_vars = input_shape[1]
+        n_vars = min(input_shape[1], 200)
 
         padding = 'valid'
 
