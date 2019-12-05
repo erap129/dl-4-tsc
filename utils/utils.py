@@ -56,24 +56,27 @@ def create_path(root_dir,classifier_name, archive_name):
 def read_dataset(root_dir,archive_name,dataset_name):
     datasets_dict = {}
 
-    if archive_name == 'mts_archive' or archive_name == 'EEG':
+    if archive_name == 'mts_archive' or archive_name == 'EEG' or archive_name == 'Multivariate_ts':
+        x = 'x'
+        if archive_name == 'Multivariate_ts':
+            x = 'X'
         file_name = root_dir+'/archives/'+archive_name+'/'+dataset_name+'/'
-        x_train = np.load(file_name + 'x_train.npy')
+        x_train = np.load(file_name + f'{x}_train.npy')
         y_train = np.load(file_name + 'y_train.npy')
-        x_test = np.load(file_name + 'x_test.npy')
+        x_test = np.load(file_name + f'{x}_test.npy')
         y_test = np.load(file_name + 'y_test.npy')
 
-        if archive_name == 'EEG':
+        if archive_name == 'EEG' or archive_name == 'Multivariate_ts':
             x_train = np.transpose(x_train, (0, 2, 1))
             x_test = np.transpose(x_test, (0, 2, 1))
 
         datasets_dict[dataset_name] = (x_train.copy(), y_train.copy(), x_test.copy(),
                                        y_test.copy())
 
-    elif archive_name == 'Multivariate_ts':
-        datasets_dict[dataset_name] = sktime_to_numpy(
-            root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TRAIN.ts',
-            root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TEST.ts')
+    # elif archive_name == 'Multivariate_ts':
+    #     datasets_dict[dataset_name] = sktime_to_numpy(
+    #         root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TRAIN.ts',
+    #         root_dir + '/archives/' + archive_name + '/' + dataset_name + '/' + dataset_name + '_TEST.ts')
 
     else:
         file_name = root_dir+'/archives/'+archive_name+'/'+dataset_name+'/'+dataset_name

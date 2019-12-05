@@ -16,8 +16,7 @@ from utils.utils import viz_cam
 
 import numpy as np
 import sys
-import sklearn 
-os.environ["CUDA_VISIBLE_DEVICES"] = ''
+import sklearn
 
 def add_exp(architecture, dataset, iteration, total_time, result):
     res_dict = OrderedDict()
