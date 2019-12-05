@@ -13,10 +13,14 @@ from utils.utils import transform_mts_to_ucr_format
 from utils.utils import visualize_filter
 from utils.utils import viz_for_survey_paper
 from utils.utils import viz_cam
+from sklearn.preprocessing import MinMaxScaler
 
 import numpy as np
 import sys
 import sklearn
+os.environ["CUDA_VISIBLE_DEVICES"] = ''
+NORMALIZE = False
+
 
 def add_exp(architecture, dataset, iteration, total_time, result):
     res_dict = OrderedDict()
@@ -38,6 +42,13 @@ def fit_classifier():
     y_train = datasets_dict[dataset_name][1]
     x_test = datasets_dict[dataset_name][2]
     y_test = datasets_dict[dataset_name][3]
+
+    if NORMALIZE:
+        for chan in range(x_train.shape[2]):
+            scaler = MinMaxScaler()
+            scaler.fit(x_train[:, :, chan])
+            x_train[:, :, chan] = scaler.transform(x_train[:, :, chan])
+            x_test[:, :, chan] = scaler.transform(x_test[:, :, chan])
 
     nb_classes = len(np.unique(np.concatenate((y_train,y_test),axis =0)))
 
@@ -112,6 +123,9 @@ elif sys.argv[1]=='generate_results_csv':
     res = generate_results_csv('results.csv',root_dir)
     print(res)
 else:
+    if len(sys.argv) > 4:
+        if sys.argv[5] == 'normalize':
+            NORMALIZE = True
     # this is the code used to launch an experiment on a dataset
     for archive_name in sys.argv[1].split(','):
         for dataset_name in sys.argv[2].split(','):
@@ -134,7 +148,7 @@ else:
                             print('DONE')
                             # the creation of this directory means
                             create_directory(output_directory_name + '/DONE')
-                            exp_line = add_exp(classifier_name, dataset_name, itr, total_time, res)
+                            exp_line = add_exp(classifier_name, dataset_name, itr, total_time, res[0])
                             upload_exp_results_to_gdrive(exp_line, 'University/Masters/Experiment Results/EEGNAS_results.xlsx')
                     except Exception as e:
                         from datetime import datetime
