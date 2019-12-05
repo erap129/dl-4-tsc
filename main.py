@@ -123,7 +123,7 @@ elif sys.argv[1]=='generate_results_csv':
     res = generate_results_csv('results.csv',root_dir)
     print(res)
 else:
-    if len(sys.argv) > 4:
+    if len(sys.argv) > 5:
         if sys.argv[5] == 'normalize':
             NORMALIZE = True
     # this is the code used to launch an experiment on a dataset
